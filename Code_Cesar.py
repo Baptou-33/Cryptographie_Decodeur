@@ -43,14 +43,15 @@ def cesar_brute_force(texte):
     for decalage in range(26):
         texte_decode = appliquer_cesar(texte, decalage)
         score = score_francais(texte_decode)
-        resultats.append((decalage, score, texte_decode))
+        resultats.append(("Code César", score, texte_decode, decalage))
     resultats.sort(key=lambda x: x[1], reverse=True)
     return resultats
 
 # Fonction utilisée dans la fonction principale
 def decoder_cesar(texte):
     resultats = cesar_brute_force(texte)
-    return resultats[0]
+    meilleur_score = resultats[0][1]
+    return [r for r in resultats if r[1] == meilleur_score] # On envoie tous les premiers
 
 
 
@@ -58,10 +59,13 @@ def decoder_cesar(texte):
 def main():
     text_test = input("Texte à déchiffrer: ")
     resultats = cesar_brute_force(text_test)
-    for decalage, score, texte_decode in resultats:
+    for nom, score, texte_decode, decalage in resultats:
         if score < SEUIL_VRAISEMBLANCE:
             break
-        print(decalage, score, texte_decode)
+        print(f"\n{nom} a décodé :\n"
+              f"{texte_decode}\n"
+              f"avec un score de {score}\n"
+              f"et avec un décalage de -{decalage}")
 
 
 if __name__ == '__main__':
