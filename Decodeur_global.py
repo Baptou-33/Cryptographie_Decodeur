@@ -1,5 +1,6 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
 from Code_Cesar import decoder_cesar
+from Code_A1Z26 import decoder_a1z21
 
 
 
@@ -15,6 +16,7 @@ def main():
 
     # On teste tous les algorithmes
     resultats.extend(decoder_cesar(texte_chiffre))
+    resultats.extend(decoder_a1z21(texte_chiffre))
 
     # On affiche le meilleur résultat
     print(f"\n{resultats[0][0]} a décodé :\n"
