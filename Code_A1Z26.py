@@ -20,7 +20,7 @@ def appliquer_a1z21(texte, offset):
 # Fonction utilisée dans la fonction principale
 def decoder_a1z21(texte):
     resultats = []
-    # Même si a priori a = 1, on teste si ca ne commencerait pas avec a = 0
+    # Même si a priori a = 1, on teste si ca ne commencerait pas avec a =
     for offset in range(2):
         resultat = appliquer_a1z21(texte, offset)
         score = score_francais(resultat)
