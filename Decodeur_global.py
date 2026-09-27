@@ -2,6 +2,7 @@
 from Code_Cesar import decoder_cesar
 from Code_A1Z26 import decoder_a1z21
 from Code_ASCII import decoder_ascii
+from Code_transposition import decoder_transposition
 
 
 
@@ -19,6 +20,7 @@ def main():
     resultats.extend(decoder_cesar(texte_chiffre))
     resultats.extend(decoder_a1z21(texte_chiffre))
     resultats.extend(decoder_ascii(texte_chiffre))
+    resultats.extend(decoder_transposition(texte_chiffre))
 
     # On affiche le meilleur résultat
     resultats.sort(key=lambda x: x[1], reverse=True)

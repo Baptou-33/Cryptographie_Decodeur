@@ -1,6 +1,6 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
 import string
-from Score_texte import score_francais, SEUIL_VRAISEMBLANCE
+from Score_texte import score_francais
 
 
 
@@ -33,13 +33,11 @@ def decoder_cesar(texte):
 def main():
     text_test = input("Texte à déchiffrer: ")
     resultats = decoder_cesar(text_test)
-    for nom, score, texte_decode, decalage in resultats:
-        if score < SEUIL_VRAISEMBLANCE:
-            break
-        print(f"\n{nom} a décodé :\n"
-              f"{texte_decode}\n"
-              f"avec un score de {score}\n"
-              f"et avec un décalage de -{decalage}")
+    nom, score, texte_decode, decalage = resultats[0]
+    print(f"\n{nom} a décodé :\n"
+          f"{texte_decode}\n"
+          f"avec un score de {score}\n"
+          f"et avec un décalage de -{decalage}")
 
 
 if __name__ == '__main__':
