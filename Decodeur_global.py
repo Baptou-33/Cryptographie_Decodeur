@@ -15,12 +15,17 @@ resultats = []
 def main():
     # On entre le code encrypté
     texte_chiffre = input("Texte à decoder: ")
+    parametres = input("Paramètres: ")
 
     # On teste tous les algorithmes
-    resultats.extend(decoder_cesar(texte_chiffre))
+    resultats.extend(decoder_cesar(texte_chiffre, parametres))
     resultats.extend(decoder_a1z21(texte_chiffre))
     resultats.extend(decoder_ascii(texte_chiffre))
-    resultats.extend(decoder_transposition(texte_chiffre))
+    resultats.extend(decoder_transposition(texte_chiffre, parametres))
+
+    if not resultats:
+        print("\nAucun décodeur n'a renvoyé de résultat pour ce texte")
+        return
 
     # On affiche le meilleur résultat
     resultats.sort(key=lambda x: x[1], reverse=True)

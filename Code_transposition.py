@@ -14,13 +14,31 @@ def appliquer_transposition(texte, colonnes):
     # Lecture colonne par colonne
     return ''.join(grille[ligne][col] for col in range(colonnes) for ligne in range(lignes))
 
+def est_colonnes_valide(parametres, texte):
+    try:
+        valeur = int(parametres)
+    except (ValueError, TypeError):
+        return False
+    return valeur in diviseurs(len(texte))
+
 # Fonction utilisée dans la fonction principale
-def decoder_transposition(texte):
+def decoder_transposition(texte, parametres):
+    if est_colonnes_valide(parametres, texte):
+        valeur = int(parametres)
+        colonnes_a_tester = {valeur, len(texte) // valeur}
+    else:
+        colonnes_a_tester = diviseurs(len(texte))
+
     resultats = []
-    for colonnes in diviseurs(len(texte)):
+    for colonnes in colonnes_a_tester:
         texte_decode = appliquer_transposition(texte, colonnes)
         score = score_francais(texte_decode)
         resultats.append(("Code transposition", score, texte_decode, colonnes))
+
+    if not resultats:
+        # Nombre premier donc aucun tableau possible
+        return []
+
     resultats.sort(key=lambda x: x[1], reverse=True)
     meilleur_score = resultats[0][1]
     return [r for r in resultats if r[1] == meilleur_score]  # On envoie tous les premiers
@@ -30,12 +48,13 @@ def decoder_transposition(texte):
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
     text_test = input("Texte à déchiffrer: ")
-    resultats = decoder_transposition(text_test)
+    parametre = input("Paramètre: ")
+    resultats = decoder_transposition(text_test, parametre)
     nom, score, texte_decode, colonne = resultats[0]
     print(f"\n{nom} a décodé :\n"
           f"{texte_decode}\n"
           f"avec un score de {score}\n"
-          f"et avec des colonnes de -{colonne}")
+          f"et avec des colonnes de {colonne}")
 
 
 if __name__ == '__main__':
