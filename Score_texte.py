@@ -41,11 +41,11 @@ SCORE_MAX_TRIGRAMME = max(FREQUENCES_TRIGRAMMES.values())
 
 
 def extraire_mots(texte):
-    # On construit des chaines de caractère à avec tous les a-z + avec accents collés
-    return re.findall(r"[a-zàâäéèêëîïôöùûü]+", texte.lower())
+    # On construit des chaines de caractère à avec toutes les lettres
+    return re.findall(r"[^\W\d_]+", texte.lower())
 
 def extraire_lettres(texte):
-    return re.findall(r"[a-zàâäéèêëîïôöùûü]", texte.lower())
+    return re.findall(r"[^\W\d_]", texte.lower())
 
 def extraire_ngrammes(texte, n):
     lettres = extraire_lettres(texte)

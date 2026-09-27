@@ -23,7 +23,7 @@ def est_decalage_valide(parametres):
         return False
     return 1 <= valeur <= 25
 
-def cesar_brute_force(texte, decalages_a_tester=range(26)):
+def cesar_brute_force(texte, decalages_a_tester=range(1, 26)):
     resultats = []
     for decalage in decalages_a_tester:
         texte_decode = appliquer_cesar(texte, decalage)
