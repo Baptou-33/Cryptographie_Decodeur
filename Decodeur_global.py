@@ -1,4 +1,5 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
+from Fonction_globales import *
 from Code_Cesar import decoder_cesar
 from Code_A1Z26 import decoder_a1z21
 from Code_ASCII import decoder_ascii
@@ -7,6 +8,7 @@ from Code_Acrostiche import decoder_acrostiche
 from Code_Periodique import decoder_periodique
 from Code_Clavier_9_touches import decoder_clavier_9_touches
 from Code_Premiers_mots import decoder_premiers_mots
+from Code_Morse import decoder_morse
 
 
 
@@ -17,7 +19,8 @@ exemples = {"12;1;0;19;15; 12;21;20;9;15; 14;0;4;5;0; 12;0;5;14;9; 7;13;5;0;5; 1
             "L’asticot sénégalais orientait l’Ukraine ton idiot ours nous est satisfaisant ta chère hyène indoue est née": "lasolutionestchien",
             "ivu wvby jlaal mvpz sh ylwvuzl lza sh zvbzayhjapvu kl xbpugl why kpe" : "bon pour cette fois la reponse est la soustraction de quinze par dix",
             "84 92 R 31 G 7 68 53 L 9 A 92 T E 7 T R 68 31 32" : "PoURGaGNErILFAUTENTRErGaGe",
-            "21 53 32 93 21 62 31 32 73 41 73 21 42 21 61 22 32 53 53": "alexandergrahambell"}
+            "21 53 32 93 21 62 31 32 73 41 73 21 42 21 61 22 32 53 53": "alexandergrahambell",
+            "-... .-. .- ...- --- / .- / ...- --- ..- ... / .-.. .- / ... --- .-.. ..- - .. --- -. / . ... - / -- --- .-. ... .": "bravo a vous la solution est morse"}
 
 
 
@@ -33,6 +36,7 @@ def chercher_solution(texte_chiffre, parametres, verification = False, attendu =
     resultats.extend(decoder_periodique(texte_chiffre))
     resultats.extend(decoder_clavier_9_touches(texte_chiffre))
     resultats.extend(decoder_premiers_mots(texte_chiffre))
+    resultats.extend(decoder_morse(texte_chiffre))
 
     if not resultats:
         print(f"\nAucun décodeur n'a renvoyé de résultat pour ce texte :\n{texte_chiffre}")
@@ -41,23 +45,7 @@ def chercher_solution(texte_chiffre, parametres, verification = False, attendu =
     # On affiche le meilleur résultat
     resultats.sort(key=lambda x: x[1], reverse=True)
     if (not verification) or verification and resultats[0][2] != attendu:
-        print(f"\n{texte_chiffre}\n\n"
-              f"{resultats[0][0]} a décodé :\n"
-              f"{resultats[0][2]}\n"
-              f"avec un score de {resultats[0][1]}\n"
-              f"et avec comme paramètres :\n"
-              f"{resultats[0][3]}")
-
-# On fait une fonction qui accepte les inputs sur plusieurs lignes
-def safe_input(info):
-    print(f"Entrez {info} puis appuyez sur Entrée deux fois :")
-    lignes = []
-    while True:
-        ligne = input()
-        if ligne == "":
-            break
-        lignes.append(ligne)
-    return " ".join(lignes)
+        afficher_resultat(resultats[0])
 
 
 

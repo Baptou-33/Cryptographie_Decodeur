@@ -1,5 +1,4 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-# pip install wordfreq
 import math
 import random
 import re
@@ -29,18 +28,14 @@ LAMBDA_3, LAMBDA_2, LAMBDA_1, LAMBDA_0 = 0.60, 0.30, 0.09, 0.01
 CARACTERE_INCONNU = '#' # À utiliser dans les décodeurs pour une valeur qui n'a pas pu être convertie
 
 def normaliser(texte):
-    # Ne garde que les lettres a-z (+ le marqueur "valeur inconnue"), en minuscules, sans accents,
-    # sans espaces ni ponctuation. Ex : "Le garçon, ça va ?" -> "legarconcava"
+    # On ne garde que les lettres a-z, en minuscules, sans accents, sans espaces ni ponctuation.
     # CARACTERE_INCONNU est volontairement conservé : comme il n'existe dans aucun mot français,
-    # le modèle n'a aucune statistique pour lui, ce qui fait chuter le score dès qu'il apparaît -
-    # plus il y a de "?", moins le texte est jugé vraisemblable.
+    # le modèle n'a aucune statistique pour lui, ce qui fait chuter le score dès qu'il apparaît
     texte = texte.lower().replace('œ', 'oe').replace('æ', 'ae')
     decompose = unicodedata.normalize('NFD', texte) # "é" devient "e" + accent séparé
     return ''.join(c for c in decompose if 'a' <= c <= 'z' or c == CARACTERE_INCONNU)
 
 def extraire_mots(texte):
-    # [^\W\d_] = toute lettre Unicode (accents, ç, œ...), sans chiffres ni underscore.
-    # Utilisé par Code_Acrostiche.py pour découper un texte en mots.
     return re.findall(r"[^\W\d_]+", texte.lower())
 
 
@@ -59,8 +54,7 @@ _MOTS, _POIDS = _charger_vocabulaire()
 
 def _generer_texte(nb_mots, graine):
     # Simule du français écrit SANS espaces : on tire des mots au hasard selon leur fréquence
-    # réelle d'usage, puis on les colle bout à bout (les lettres à la frontière entre deux mots
-    # sont donc prises en compte par le modèle, comme dans un vrai texte sans espaces).
+    # réelle d'usage, puis on les colle bout à bout
     generateur = random.Random(graine)
     return ''.join(generateur.choices(_MOTS, weights=_POIDS, k=nb_mots))
 
@@ -110,9 +104,6 @@ _REF_MELANGE, _REF_FRANCAIS = _calibrer()
 
 # Fonction principale de scoring -----------------------------------------------------------------------------------------
 def score_francais(texte):
-    # Renvoie un score entre 0 (aucune ressemblance avec du français) et 1 (français typique).
-    # Le texte est d'abord converti en lettres collées, donc que l'entrée contienne des espaces,
-    # de la ponctuation ou non ne change rien : tous les décodeurs sont notés sur la même échelle.
     lettres = normaliser(texte)
     log_proba = _log_proba_moyenne(lettres)
     if log_proba is None:

@@ -1,26 +1,27 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
 from Fonction_globales import *
+from morse3 import Morse
 
 
 
 # Fonctions ------------------------------------------------------------------------------------------------------------
-def extraire_acrostiche(texte):
-    mots = extraire_mots(texte)
-    return ''.join(mot[0] for mot in mots)  # Première lettre de chaque mot trouvé
-
+def appliquer_morse(texte):
+    mots = texte.split('/')
+    mots_decodes = [Morse(mot).morseToString().lower() for mot in mots]
+    return ' '.join(mots_decodes)
 
 # Fonction utilisée dans la fonction principale
-def decoder_acrostiche(texte):
-    resultat = extraire_acrostiche(texte)
+def decoder_morse(texte):
+    resultat = appliquer_morse(texte)
     score = score_francais(resultat)
-    return [("Acrostiche (1ere lettre de chaque mot)", score, resultat, None)]
+    return [("Code Morse", score, resultat, None)]
 
 
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
     text_test = safe_input("le texte à decoder")
-    resultats = decoder_acrostiche(text_test)
+    resultats = decoder_morse(text_test)
     afficher_resultat(resultats[0])
 
 

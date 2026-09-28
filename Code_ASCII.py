@@ -1,13 +1,9 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-import re
-from Score_texte import score_francais, CARACTERE_INCONNU
+from Fonction_globales import *
 
 
 
 # Fonctions ------------------------------------------------------------------------------------------------------------
-def extraire_nombres(texte):
-    return [int(n) for n in re.findall(r"\d+", texte)] # On ne récupère que les nombres, n'importe le séparateur
-
 def nombre_lettre(nombre):
     if 32 <= nombre <= 126:
         return chr(nombre)
@@ -27,12 +23,9 @@ def decoder_ascii(texte):
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
-    text_test = input("Texte à déchiffrer: ")
+    text_test = safe_input("le texte à decoder")
     resultats = decoder_ascii(text_test)
-    nom, score, texte_decode, parametres = resultats[0]
-    print(f"\n{nom} a décodé :\n"
-          f"{texte_decode}\n"
-          f"avec un score de {score}")
+    afficher_resultat(resultats[0])
 
 
 if __name__ == '__main__':

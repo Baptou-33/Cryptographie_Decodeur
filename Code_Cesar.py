@@ -1,6 +1,6 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
+from Fonction_globales import *
 import string
-from Score_texte import score_francais
 
 
 
@@ -46,14 +46,10 @@ def decoder_cesar(texte, parametres=None):
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
-    text_test = input("Texte à déchiffrer: ")
-    parametre = input("Paramètre: ")
+    text_test = safe_input("le texte à decoder")
+    parametre = safe_input("les paramètres")
     resultats = decoder_cesar(text_test, parametre)
-    nom, score, texte_decode, decalage = resultats[0]
-    print(f"\n{nom} a décodé :\n"
-          f"{texte_decode}\n"
-          f"avec un score de {score}\n"
-          f"et avec un décalage de {decalage}")
+    afficher_resultat(resultats[0])
 
 
 if __name__ == '__main__':

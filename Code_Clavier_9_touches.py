@@ -1,14 +1,9 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-import re
-from Score_texte import score_francais, CARACTERE_INCONNU
-
+from Fonction_globales import *
 
 
 
 # Fonctions ------------------------------------------------------------------------------------------------------------
-def extraire_nombres(texte):
-    return [int(n) for n in re.findall(r"\d+", texte)] # On ne récupère que les nombres, n'importe le séparateur
-
 def nombre_lettre(touche, clicks):
     if touche < 2 or touche > 9:
         return CARACTERE_INCONNU
@@ -47,14 +42,10 @@ def decoder_clavier_9_touches(texte, sens = -1):
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
-    text_test = input("Texte à déchiffrer: ")
-    parametre = input("Parametre: ")
+    text_test = safe_input("le texte à decoder")
     resultats = decoder_clavier_9_touches(text_test)
-    nom, score, texte_decode, sens = resultats[0]
-    print(f"\n{nom} a décodé :\n"
-          f"{texte_decode}\n"
-          f"avec un score de {score}\n"
-          f"avec pour paramètre {sens}")
+    afficher_resultat(resultats[0])
+
 
 if __name__ == '__main__':
     main()

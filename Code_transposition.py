@@ -1,5 +1,5 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-from Score_texte import score_francais
+from Fonction_globales import *
 
 
 
@@ -47,14 +47,10 @@ def decoder_transposition(texte, parametres):
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
-    text_test = input("Texte à déchiffrer: ")
-    parametre = input("Paramètre: ")
+    text_test = safe_input("le texte à decoder")
+    parametre = safe_input("les paramètres")
     resultats = decoder_transposition(text_test, parametre)
-    nom, score, texte_decode, colonne = resultats[0]
-    print(f"\n{nom} a décodé :\n"
-          f"{texte_decode}\n"
-          f"avec un score de {score}\n"
-          f"et avec des colonnes de {colonne}")
+    afficher_resultat(resultats[0])
 
 
 if __name__ == '__main__':

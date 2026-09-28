@@ -1,5 +1,5 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-from Score_texte import score_francais, extraire_mots
+from Fonction_globales import *
 
 
 
@@ -30,12 +30,9 @@ def decoder_premiers_mots(texte):
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
-    text_test = input("Texte à déchiffrer: ")
+    text_test = safe_input("le texte à decoder")
     resultats = decoder_premiers_mots(text_test)
-    nom, score, texte_decode, parametre = resultats[0]
-    print(f"\n{nom} a décodé :\n"
-          f"{texte_decode}\n"
-          f"avec un score de {score}\n")
+    afficher_resultat(resultats[0])
 
 
 if __name__ == '__main__':
