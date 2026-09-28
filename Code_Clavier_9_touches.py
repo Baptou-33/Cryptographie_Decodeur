@@ -4,31 +4,41 @@ from Score_texte import score_francais
 
 
 
+
 # Fonctions ------------------------------------------------------------------------------------------------------------
 def extraire_nombres(texte):
     return [int(n) for n in re.findall(r"\d+", texte)] # On ne récupère que les nombres, n'importe le séparateur
 
-def nombre_lettre(nombre, offset):
-    if 0 + offset <= nombre <= 25 + offset:
-        return chr(nombre - offset + ord('a'))
-    return '?' # En cas de symbole inconnu, on met ?
-
-def appliquer_a1z21(texte, offset):
-    nombres = extraire_nombres(texte)
-    return ''.join(nombre_lettre(n, offset) for n in nombres)
-
-# Fonction utilisée dans la fonction principale
-def decoder_a1z21(texte, parametre = 2):
-    if parametre in (1, 2):
-        test = range(parametre, parametre + 1)
+def nombre_lettre(touche, clicks):
+    if touche < 2 or touche > 9:
+        return '?'
+    if touche == 9:
+        if clicks >4:
+            return '?'
     else:
-        test = range(2)
+        if clicks > 3:
+            return '?'
+    return chr((touche-2) * 3 + clicks - 1 + ord('a'))
+
+def appliquer_clavier_9_touches(texte, sens = 0):
+    nombres = extraire_nombres(texte)
+    if sens == 0:
+        return ''.join(nombre_lettre(n//10, n%10) for n in nombres)
+    return ''.join(nombre_lettre(n % 10, n // 10) for n in nombres)
+
+def decoder_clavier_9_touches(texte, sens = -1):
     resultats = []
-    # Même si a priori a = 1, on teste si ca ne commencerait pas avec a = 0
-    for offset in test:
-        resultat = appliquer_a1z21(texte, offset)
+
+    if sens in (0, 1):
+        parametres = {sens}
+    else:
+        parametres = range(1)
+
+    for i in parametres:
+        resultat = appliquer_clavier_9_touches(texte, i)
         score = score_francais(resultat)
-        resultats.append(("Code A1Z21", score, resultat, offset))
+        resultats.append(("Code Clavier 9 touches", score, resultat, i))
+
     resultats.sort(key=lambda x: x[1], reverse=True)
     meilleur_score = resultats[0][1]
     return [r for r in resultats if r[1] == meilleur_score] # On envoie tous les premiers
@@ -38,13 +48,13 @@ def decoder_a1z21(texte, parametre = 2):
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
     text_test = input("Texte à déchiffrer: ")
-    resultats = decoder_a1z21(text_test)
-    nom, score, texte_decode, offset = resultats[0]
+    parametre = input("Parametre: ")
+    resultats = decoder_clavier_9_touches(text_test)
+    nom, score, texte_decode, sens = resultats[0]
     print(f"\n{nom} a décodé :\n"
           f"{texte_decode}\n"
           f"avec un score de {score}\n"
-          f"et où le 'a' a pour indice {offset}")
-
+          f"avec pour paramètre {sens}")
 
 if __name__ == '__main__':
     main()

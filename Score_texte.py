@@ -7,7 +7,6 @@ from wordfreq import top_n_list, word_frequency
 
 
 # Paramètres -----------------------------------------------------------------------------------------------------------
-SEUIL_VRAISEMBLANCE = 0.5 # Seuil en dessous duquel on considère que ce n'est pas une phrase en francais
 NB_MOTS_CORPUS = 5000 # Nombre de mots français les plus fréquents qu'on utilise pour construire less n-grammes
 
 
@@ -17,7 +16,22 @@ SPELL_FR = SpellChecker(language='fr')
 
 
 
-# Fonctions ------------------------------------------------------------------------------------------------------------
+# Avec espaces ---------------------------------------------------------------------------------------------------------
+def extraire_mots(texte):
+    # On construit des chaines de caractère à avec toutes les lettres
+    return re.findall(r"[^\W\d_]+", texte.lower())
+
+def score_mots(texte):
+    # Score basé sur la reconnaissance de mots entiers (efficace quand le texte a des espaces)
+    mots = extraire_mots(texte)
+    if not mots:
+        return 0
+    connus = SPELL_FR.known(mots)
+    return len(connus) / len(mots)
+
+
+
+# Sans espaces ---------------------------------------------------------------------------------------------------------
 def construire_frequences_ngrammes(n, nb_mots=NB_MOTS_CORPUS):
     # On compte le nbr de ngrammes dans les mots français les plus courants
     frequences = defaultdict(float)
@@ -39,26 +53,12 @@ FREQUENCES_TRIGRAMMES = construire_frequences_ngrammes(3)
 SCORE_MAX_BIGRAMME = max(FREQUENCES_BIGRAMMES.values())
 SCORE_MAX_TRIGRAMME = max(FREQUENCES_TRIGRAMMES.values())
 
-
-def extraire_mots(texte):
-    # On construit des chaines de caractère à avec toutes les lettres
-    return re.findall(r"[^\W\d_]+", texte.lower())
-
 def extraire_lettres(texte):
     return re.findall(r"[^\W\d_]", texte.lower())
 
 def extraire_ngrammes(texte, n):
     lettres = extraire_lettres(texte)
     return [''.join(lettres[i:i + n]) for i in range(len(lettres) - n + 1)]
-
-
-def score_mots(texte):
-    # Score basé sur la reconnaissance de mots entiers (efficace quand le texte a des espaces)
-    mots = extraire_mots(texte)
-    if not mots:
-        return 0
-    connus = SPELL_FR.known(mots)
-    return len(connus) / len(mots)
 
 def score_bigrammes(texte):
     bigrammes = extraire_ngrammes(texte, 2)
@@ -78,7 +78,6 @@ def score_ngrammes(texte):
     # Trigrammes + significatifs que les bigrammes donc + de poids
     return (score_bigrammes(texte) + 2 * score_trigrammes(texte)) / 3
 
-
-# Fonction utilisée dans les autres algorithmes de cryptographie
+# Fonction utilisée dans les autres algorithmes de cryptographie -------------------------------------------------------
 def score_francais(texte):
     return max(score_mots(texte), score_ngrammes(texte))
