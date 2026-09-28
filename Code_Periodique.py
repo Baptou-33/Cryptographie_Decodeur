@@ -1,5 +1,5 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
-from Score_texte import score_francais
+from Score_texte import score_francais, CARACTERE_INCONNU
 
 
 
@@ -29,7 +29,7 @@ def convertir_token(mot):
         numero = int(mot)
         if 1 <= numero < len(SYMBOLES):
             return SYMBOLES[numero]
-        return "?" # Nombre ne correspondant à aucun élément
+        return CARACTERE_INCONNU # Nombre ne correspondant à aucun élément
     return mot  # Si ce n'est pas un nombre, on le garde tel quel
 
 def appliquer_periodique(texte):

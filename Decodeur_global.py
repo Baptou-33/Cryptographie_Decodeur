@@ -11,7 +11,7 @@ from Code_Premiers_mots import decoder_premiers_mots
 
 
 # Initialisation -------------------------------------------------------------------------------------------------------
-exemples = {"12;1;0;19;15; 12;21;20;9;15; 14;0;4;5;0; 12;0;5;14;9; 7;13;5;0;5; 19;20;0;15;18; 4;9;14;1;20; 5;21;18" : "la?solution?de?l?enigme?est?ordinateur",
+exemples = {"12;1;0;19;15; 12;21;20;9;15; 14;0;4;5;0; 12;0;5;14;9; 7;13;5;0;5; 19;20;0;15;18; 4;9;14;1;20; 5;21;18" : "la solution de l enigme est ordinateur",
             "76 69 32 77 79 84 32 68 69 32 80 65 83 83 69 32 68 69 32 67 69 84 84 69 32 69 78 73 71 77 69 32 69 83 84 32 65 83 67 73 73 32 76 69 32 77 79 89 69 78 32 69 77 80 76 79 89 69 32 80 79 85 82 32 67 79 68 69 82 32 67 69 32 67 79 68 69" : "LE MOT DE PASSE DE CETTE ENIGME EST ASCII LE MOYEN EMPLOYE POUR CODER CE CODE",
             "LLTGSREETMTAMDEEAMOEECNMTCNIAECEIEGS" : "LEMOTCLEDECETTEENIGMECIESTANAGRAMMES",
             "L’asticot sénégalais orientait l’Ukraine ton idiot ours nous est satisfaisant ta chère hyène indoue est née": "lasolutionestchien",
@@ -58,6 +58,8 @@ def safe_input(info):
             break
         lignes.append(ligne)
     return " ".join(lignes)
+
+
 
 # Main -----------------------------------------------------------------------------------------------------------------
 def main():

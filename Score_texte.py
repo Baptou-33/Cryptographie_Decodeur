@@ -1,83 +1,121 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
+# pip install wordfreq
+import math
+import random
 import re
-from spellchecker import SpellChecker
-from collections import defaultdict
+import unicodedata
+from collections import Counter
+
 from wordfreq import top_n_list, word_frequency
 
 
 
 # Paramètres -----------------------------------------------------------------------------------------------------------
-NB_MOTS_CORPUS = 5000 # Nombre de mots français les plus fréquents qu'on utilise pour construire less n-grammes
+SEUIL_VRAISEMBLANCE = 0.5 # Seuil en dessous duquel on considère que ce n'est pas une phrase en francais
+
+NB_MOTS_VOCABULAIRE = 20000 # Nombre de mots français courants (wordfreq) utilisés pour fabriquer le corpus
+NB_MOTS_CORPUS = 200000     # Taille du corpus d'apprentissage (en mots tirés au hasard selon leur fréquence)
+NB_MOTS_TEST = 30000        # Taille du corpus de calibration (différent de celui d'apprentissage)
+LONGUEUR_ECHANTILLON = 40   # Longueur (en lettres) des extraits utilisés pour calibrer l'échelle
+NB_ECHANTILLONS = 300       # Nombre d'extraits utilisés pour calibrer l'échelle
+GRAINE = 42                 # Graine aléatoire fixe : le score d'un texte est toujours le même
+
+# Poids du modèle : trigrammes, bigrammes, lettres seules, et un petit reste uniforme (lissage)
+LAMBDA_3, LAMBDA_2, LAMBDA_1, LAMBDA_0 = 0.60, 0.30, 0.09, 0.01
 
 
 
-# Initialisation -------------------------------------------------------------------------------------------------------
-SPELL_FR = SpellChecker(language='fr')
+# Normalisation ----------------------------------------------------------------------------------------------------------
+CARACTERE_INCONNU = '#' # À utiliser dans les décodeurs pour une valeur qui n'a pas pu être convertie
 
+def normaliser(texte):
+    # Ne garde que les lettres a-z (+ le marqueur "valeur inconnue"), en minuscules, sans accents,
+    # sans espaces ni ponctuation. Ex : "Le garçon, ça va ?" -> "legarconcava"
+    # CARACTERE_INCONNU est volontairement conservé : comme il n'existe dans aucun mot français,
+    # le modèle n'a aucune statistique pour lui, ce qui fait chuter le score dès qu'il apparaît -
+    # plus il y a de "?", moins le texte est jugé vraisemblable.
+    texte = texte.lower().replace('œ', 'oe').replace('æ', 'ae')
+    decompose = unicodedata.normalize('NFD', texte) # "é" devient "e" + accent séparé
+    return ''.join(c for c in decompose if 'a' <= c <= 'z' or c == CARACTERE_INCONNU)
 
-
-# Avec espaces ---------------------------------------------------------------------------------------------------------
 def extraire_mots(texte):
-    # On construit des chaines de caractère à avec toutes les lettres
+    # [^\W\d_] = toute lettre Unicode (accents, ç, œ...), sans chiffres ni underscore.
+    # Utilisé par Code_Acrostiche.py pour découper un texte en mots.
     return re.findall(r"[^\W\d_]+", texte.lower())
 
-def score_mots(texte):
-    # Score basé sur la reconnaissance de mots entiers (efficace quand le texte a des espaces)
-    mots = extraire_mots(texte)
-    if not mots:
-        return 0
-    connus = SPELL_FR.known(mots)
-    return len(connus) / len(mots)
+
+
+# Construction du modèle de langue (une seule fois au chargement du module) ----------------------------------------------
+def _charger_vocabulaire():
+    mots, poids = [], []
+    for mot in top_n_list('fr', NB_MOTS_VOCABULAIRE):
+        mot_normalise = normaliser(mot)
+        if mot_normalise:
+            mots.append(mot_normalise)
+            poids.append(word_frequency(mot, 'fr'))
+    return mots, poids
+
+_MOTS, _POIDS = _charger_vocabulaire()
+
+def _generer_texte(nb_mots, graine):
+    # Simule du français écrit SANS espaces : on tire des mots au hasard selon leur fréquence
+    # réelle d'usage, puis on les colle bout à bout (les lettres à la frontière entre deux mots
+    # sont donc prises en compte par le modèle, comme dans un vrai texte sans espaces).
+    generateur = random.Random(graine)
+    return ''.join(generateur.choices(_MOTS, weights=_POIDS, k=nb_mots))
+
+_TEXTE_APPRENTISSAGE = _generer_texte(NB_MOTS_CORPUS, GRAINE)
+_N1 = Counter(_TEXTE_APPRENTISSAGE)
+_N2 = Counter(_TEXTE_APPRENTISSAGE[i:i + 2] for i in range(len(_TEXTE_APPRENTISSAGE) - 1))
+_N3 = Counter(_TEXTE_APPRENTISSAGE[i:i + 3] for i in range(len(_TEXTE_APPRENTISSAGE) - 2))
+_TOTAL = len(_TEXTE_APPRENTISSAGE)
 
 
 
-# Sans espaces ---------------------------------------------------------------------------------------------------------
-def construire_frequences_ngrammes(n, nb_mots=NB_MOTS_CORPUS):
-    # On compte le nbr de ngrammes dans les mots français les plus courants
-    frequences = defaultdict(float)
-    total = 0
-    for mot in top_n_list('fr', nb_mots):
-        freq_mot = word_frequency(mot, 'fr')
-        for i in range(len(mot) - n + 1):
-            ngramme = mot[i:i + n]
-            frequences[ngramme] += freq_mot
-            total += freq_mot
-    if total > 0:
-        for ngramme in frequences:
-            frequences[ngramme] /= total
-    return frequences
+# Calcul de vraisemblance ------------------------------------------------------------------------------------------------
+def _proba(a, b, c):
+    # Probabilité que la lettre c suive les lettres a, b (mélange trigramme / bigramme / lettre seule)
+    p3 = _N3[a + b + c] / _N2[a + b] if _N2[a + b] else 0
+    p2 = _N2[b + c] / _N1[b] if _N1[b] else 0
+    p1 = _N1[c] / _TOTAL
+    return LAMBDA_3 * p3 + LAMBDA_2 * p2 + LAMBDA_1 * p1 + LAMBDA_0 / 26
 
-FREQUENCES_BIGRAMMES = construire_frequences_ngrammes(2)
-FREQUENCES_TRIGRAMMES = construire_frequences_ngrammes(3)
+def _log_proba_moyenne(lettres):
+    # Moyenne (par lettre) du log de la probabilité : plus c'est haut, plus ça ressemble à du français
+    if len(lettres) < 3:
+        return None
+    total = sum(math.log(_proba(lettres[i], lettres[i + 1], lettres[i + 2]))
+                for i in range(len(lettres) - 2))
+    return total / (len(lettres) - 2)
 
-SCORE_MAX_BIGRAMME = max(FREQUENCES_BIGRAMMES.values())
-SCORE_MAX_TRIGRAMME = max(FREQUENCES_TRIGRAMMES.values())
+def _calibrer():
+    # Deux points de repère, mesurés sur des extraits de même longueur :
+    # - du vrai français sans espaces  -> ce qui vaudra 1
+    # - les mêmes lettres mélangées    -> ce qui vaudra 0 (bonnes lettres, mauvais ordre)
+    texte = _generer_texte(NB_MOTS_TEST, GRAINE + 1)
+    generateur = random.Random(GRAINE + 2)
+    francais, melange = [], []
+    for _ in range(NB_ECHANTILLONS):
+        debut = generateur.randrange(len(texte) - LONGUEUR_ECHANTILLON)
+        extrait = texte[debut:debut + LONGUEUR_ECHANTILLON]
+        lettres = list(extrait)
+        generateur.shuffle(lettres)
+        francais.append(_log_proba_moyenne(extrait))
+        melange.append(_log_proba_moyenne(''.join(lettres)))
+    return sum(melange) / len(melange), sum(francais) / len(francais)
 
-def extraire_lettres(texte):
-    return re.findall(r"[^\W\d_]", texte.lower())
+_REF_MELANGE, _REF_FRANCAIS = _calibrer()
 
-def extraire_ngrammes(texte, n):
-    lettres = extraire_lettres(texte)
-    return [''.join(lettres[i:i + n]) for i in range(len(lettres) - n + 1)]
 
-def score_bigrammes(texte):
-    bigrammes = extraire_ngrammes(texte, 2)
-    if not bigrammes:
-        return 0
-    score = sum(FREQUENCES_BIGRAMMES.get(bg, 0) for bg in bigrammes) / len(bigrammes)
-    return min(score / SCORE_MAX_BIGRAMME, 1.0)
 
-def score_trigrammes(texte):
-    trigrammes = extraire_ngrammes(texte, 3)
-    if not trigrammes:
-        return 0
-    score = sum(FREQUENCES_TRIGRAMMES.get(tg, 0) for tg in trigrammes) / len(trigrammes)
-    return min(score / SCORE_MAX_TRIGRAMME, 1.0)
-
-def score_ngrammes(texte):
-    # Trigrammes + significatifs que les bigrammes donc + de poids
-    return (score_bigrammes(texte) + 2 * score_trigrammes(texte)) / 3
-
-# Fonction utilisée dans les autres algorithmes de cryptographie -------------------------------------------------------
+# Fonction principale de scoring -----------------------------------------------------------------------------------------
 def score_francais(texte):
-    return max(score_mots(texte), score_ngrammes(texte))
+    # Renvoie un score entre 0 (aucune ressemblance avec du français) et 1 (français typique).
+    # Le texte est d'abord converti en lettres collées, donc que l'entrée contienne des espaces,
+    # de la ponctuation ou non ne change rien : tous les décodeurs sont notés sur la même échelle.
+    lettres = normaliser(texte)
+    log_proba = _log_proba_moyenne(lettres)
+    if log_proba is None:
+        return 0.0
+    score = (log_proba - _REF_MELANGE) / (_REF_FRANCAIS - _REF_MELANGE)
+    return max(0.0, min(1.0, score))

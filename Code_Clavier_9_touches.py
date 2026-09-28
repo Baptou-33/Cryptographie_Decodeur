@@ -1,6 +1,6 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
 import re
-from Score_texte import score_francais
+from Score_texte import score_francais, CARACTERE_INCONNU
 
 
 
@@ -11,13 +11,13 @@ def extraire_nombres(texte):
 
 def nombre_lettre(touche, clicks):
     if touche < 2 or touche > 9:
-        return '?'
+        return CARACTERE_INCONNU
     if touche == 9:
         if clicks >4:
-            return '?'
+            return CARACTERE_INCONNU
     else:
         if clicks > 3:
-            return '?'
+            return CARACTERE_INCONNU
     return chr((touche-2) * 3 + clicks - 1 + ord('a'))
 
 def appliquer_clavier_9_touches(texte, sens = 0):

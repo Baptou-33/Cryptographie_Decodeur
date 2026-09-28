@@ -1,6 +1,6 @@
 # Import des bibliothèques ---------------------------------------------------------------------------------------------
 import re
-from Score_texte import score_francais
+from Score_texte import score_francais, CARACTERE_INCONNU
 
 
 
@@ -11,7 +11,7 @@ def extraire_nombres(texte):
 def nombre_lettre(nombre):
     if 32 <= nombre <= 126:
         return chr(nombre)
-    return '?' # En cas de symbole inconnu, on met ?
+    return CARACTERE_INCONNU # En cas de symbole inconnu, on met le CARACTERE_INCONNU
 
 def appliquer_ascii(texte):
     nombres = extraire_nombres(texte)
