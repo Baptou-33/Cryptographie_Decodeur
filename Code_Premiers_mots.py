@@ -4,23 +4,34 @@ from Score_texte import score_francais, extraire_mots
 
 
 # Fonctions ------------------------------------------------------------------------------------------------------------
-def extraire_acrostiche(texte):
-    mots = extraire_mots(texte)
-    return ''.join(mot[0] for mot in mots)  # Première lettre de chaque mot trouvé
+def extraire_premiers_mots(texte):
+    phrases = texte.split(".")
+
+    premiers_mots = []
+    for phrase in phrases:
+        phrase = phrase.strip()
+        # On ignore les phrases vides
+        if not phrase:
+            continue
+
+        mots = phrase.split()
+        if mots:
+            premiers_mots.append(mots[0])
+    return " ".join(premiers_mots)
 
 
 # Fonction utilisée dans la fonction principale
-def decoder_acrostiche(texte):
-    resultat = extraire_acrostiche(texte)
+def decoder_premiers_mots(texte):
+    resultat = extraire_premiers_mots(texte)
     score = score_francais(resultat)
-    return [("Acrostiche (1ere lettre de chaque mot)", score, resultat, None)]
+    return [("Premiers mots de chaque phrase", score, resultat, None)]
 
 
 
 # Main pour test / usage unique ----------------------------------------------------------------------------------------
 def main():
     text_test = input("Texte à déchiffrer: ")
-    resultats = decoder_acrostiche(text_test)
+    resultats = decoder_premiers_mots(text_test)
     nom, score, texte_decode, parametre = resultats[0]
     print(f"\n{nom} a décodé :\n"
           f"{texte_decode}\n"

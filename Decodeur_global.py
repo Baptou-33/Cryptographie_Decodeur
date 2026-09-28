@@ -6,6 +6,7 @@ from Code_transposition import decoder_transposition
 from Code_Acrostiche import decoder_acrostiche
 from Code_Periodique import decoder_periodique
 from Code_Clavier_9_touches import decoder_clavier_9_touches
+from Code_Premiers_mots import decoder_premiers_mots
 
 
 
@@ -20,7 +21,7 @@ exemples = {"12;1;0;19;15; 12;21;20;9;15; 14;0;4;5;0; 12;0;5;14;9; 7;13;5;0;5; 1
 
 
 
-# Main -----------------------------------------------------------------------------------------------------------------
+# Fonctions ------------------------------------------------------------------------------------------------------------
 def chercher_solution(texte_chiffre, parametres, verification = False, attendu = ""):
     resultats = []
 
@@ -31,6 +32,7 @@ def chercher_solution(texte_chiffre, parametres, verification = False, attendu =
     resultats.extend(decoder_acrostiche(texte_chiffre))
     resultats.extend(decoder_periodique(texte_chiffre))
     resultats.extend(decoder_clavier_9_touches(texte_chiffre))
+    resultats.extend(decoder_premiers_mots(texte_chiffre))
 
     if not resultats:
         print(f"\nAucun décodeur n'a renvoyé de résultat pour ce texte :\n{texte_chiffre}")
@@ -46,16 +48,27 @@ def chercher_solution(texte_chiffre, parametres, verification = False, attendu =
               f"et avec comme paramètres :\n"
               f"{resultats[0][3]}")
 
+# On fait une fonction qui accepte les inputs sur plusieurs lignes
+def safe_input(info):
+    print(f"Entrez {info} puis appuyez sur Entrée deux fois :")
+    lignes = []
+    while True:
+        ligne = input()
+        if ligne == "":
+            break
+        lignes.append(ligne)
+    return " ".join(lignes)
 
+# Main -----------------------------------------------------------------------------------------------------------------
 def main():
     # On entre le code encrypté
-    texte_chiffre = input("Texte à decoder: ")
+    texte_chiffre = safe_input("le texte à decoder")
     if texte_chiffre == "check":
         for texte_chiffre, resultat_attendu in exemples.items():
             chercher_solution(texte_chiffre, "", True, resultat_attendu)
         return
 
-    parametres = input("Paramètres: ")
+    parametres = safe_input("les paramètres")
 
     chercher_solution(texte_chiffre, parametres)
 
