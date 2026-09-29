@@ -9,6 +9,7 @@ from Code_Periodique import decoder_periodique
 from Code_Clavier_9_touches import decoder_clavier_9_touches
 from Code_Premiers_mots import decoder_premiers_mots
 from Code_Morse import decoder_morse
+from Code_0_non_1_A1Z26 import decoder_0_non_1_a1z21
 
 
 
@@ -20,7 +21,8 @@ exemples = {"12;1;0;19;15; 12;21;20;9;15; 14;0;4;5;0; 12;0;5;14;9; 7;13;5;0;5; 1
             "ivu wvby jlaal mvpz sh ylwvuzl lza sh zvbzayhjapvu kl xbpugl why kpe" : "bon pour cette fois la reponse est la soustraction de quinze par dix",
             "84 92 R 31 G 7 68 53 L 9 A 92 T E 7 T R 68 31 32" : "PoURGaGNErILFAUTENTRErGaGe",
             "21 53 32 93 21 62 31 32 73 41 73 21 42 21 61 22 32 53 53": "alexandergrahambell",
-            "-... .-. .- ...- --- / .- / ...- --- ..- ... / .-.. .- / ... --- .-.. ..- - .. --- -. / . ... - / -- --- .-. ... .": "bravo a vous la solution est morse"}
+            "-... .-. .- ...- --- / .- / ...- --- ..- ... / .-.. .- / ... --- .-.. ..- - .. --- -. / . ... - / -- --- .-. ... .": "bravo a vous la solution est morse",
+            "112 012 11 09 089 118 15 116 076 115 015 114 119 016 15 15 119 120 112 023 15 116 118 015 115 14 121 19 120 14 15 117 121 016 19 114 126 15 116 11 118 14 15 121 124 096 112 11 118 012 15 116 115 114 119 15 14 085 115 046 19 120 15 120 118 15 14 02 085 115 114 114 15 15 020 15 114 112 052 15 120 063 120 118 15 119": "lareponseestleproduitdequinzepardeuxlareponsedoitetredonneeenlettres"}
 
 
 
@@ -36,6 +38,7 @@ def chercher_solution(texte_chiffre, parametres, verification = False, attendu =
     resultats.extend(decoder_periodique(texte_chiffre))
     resultats.extend(decoder_clavier_9_touches(texte_chiffre))
     resultats.extend(decoder_premiers_mots(texte_chiffre))
+    resultats.extend(decoder_morse(texte_chiffre))
     resultats.extend(decoder_morse(texte_chiffre))
 
     if not resultats:

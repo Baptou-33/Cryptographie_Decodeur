@@ -49,7 +49,8 @@ def main():
     text_test = safe_input("le texte à decoder")
     parametre = safe_input("les paramètres")
     resultats = decoder_cesar(text_test, parametre)
-    afficher_resultat(resultats[0])
+    for i in resultats:
+        afficher_resultat(i)
 
 
 if __name__ == '__main__':
